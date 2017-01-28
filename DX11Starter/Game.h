@@ -35,6 +35,7 @@ private:
 	// Mesh containers for buffer values
 	Mesh* meshOne;
 	Mesh* meshTwo;
+	Mesh* meshThree;
 
 	// Wrappers for DirectX shaders to provide simplified functionality
 	SimpleVertexShader* vertexShader;
