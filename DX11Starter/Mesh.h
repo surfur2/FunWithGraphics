@@ -2,6 +2,7 @@
 #include <d3d11.h>
 
 #pragma once
+// Class that contains the definition for rendering a shape
 class Mesh
 {
 public:
@@ -12,8 +13,11 @@ public:
 	int GetIndexCount() { return numIndicies; };
 
 private:
+	// Holds the verticies for a shape. Defines position adn color
 	ID3D11Buffer* vertexBuffer;
+	// Holds the order the verticies should be rendered in.
 	ID3D11Buffer* indexBuffer;
+	// Number indicies to render
 	int numIndicies;
 };
 

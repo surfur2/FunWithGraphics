@@ -41,6 +41,7 @@ Game::Game(HINSTANCE hInstance)
 // --------------------------------------------------------
 Game::~Game()
 {
+	// Delete all our meshes for the game.
 	delete meshOne;
 	delete meshTwo;
 	delete meshThree;
@@ -144,7 +145,7 @@ void Game::CreateMatrices()
 
 
 // --------------------------------------------------------
-// Creates the geometry we're going to draw - a single triangle for now
+// Creates the geometry we're going to draw
 // --------------------------------------------------------
 void Game::CreateBasicGeometry()
 {
@@ -165,9 +166,6 @@ void Game::CreateBasicGeometry()
 
 	};
 
-	// Set up the vertices of the triangle we would like to draw
-	// - We're going to copy this array, exactly as it exists in memory
-	//    over to a DirectX-controlled data structure (the vertex buffer)
 	Vertex verticesTwo[] =
 	{
 		{ XMFLOAT3(+3.5f, +1.0f, +0.0f), blue },
@@ -175,9 +173,6 @@ void Game::CreateBasicGeometry()
 		{ XMFLOAT3(+2.0f, -1.0f, +0.0f), green },
 	};
 
-	// Set up the vertices of the triangle we would like to draw
-	// - We're going to copy this array, exactly as it exists in memory
-	//    over to a DirectX-controlled data structure (the vertex buffer)
 	Vertex verticesThree[] =
 	{
 		{ XMFLOAT3(-3.5f, +1.0f, +0.0f), green },
@@ -194,6 +189,7 @@ void Game::CreateBasicGeometry()
 	int indicesTwo[] = { 0, 1, 2 };
 	int indiciesThree[] = { 0, 1, 2 };
 
+	// Create our meshes for the game
 	meshOne = new Mesh(verticesOne, 3, indicesOne, 3, device);
 	meshTwo = new Mesh(verticesTwo, 3, indicesTwo, 3, device);
 	meshThree = new Mesh(verticesThree, 3, indiciesThree, 3, device);
@@ -290,31 +286,19 @@ void Game::Draw(float deltaTime, float totalTime)
 	context->IASetVertexBuffers(0, 1, &temp, &stride, &offset);
 	context->IASetIndexBuffer(meshTwo->GetIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
 
-	// Finally do the actual drawing
-	//  - Do this ONCE PER OBJECT you intend to draw
-	//  - This will use all of the currently set DirectX "stuff" (shaders, buffers, etc)
-	//  - DrawIndexed() uses the currently set INDEX BUFFER to look up corresponding
-	//     vertices in the currently set VERTEX BUFFER
 	context->DrawIndexed(
-		meshTwo->GetIndexCount(),     // The number of indices to use (we could draw a subset if we wanted)
-		0,     // Offset to the first index we want to use
-		0);    // Offset to add to each index when looking up vertices
+		meshTwo->GetIndexCount(),
+		0,
+		0);
 
 	temp = meshThree->GetVertexBuffer();
 	context->IASetVertexBuffers(0, 1, &temp, &stride, &offset);
 	context->IASetIndexBuffer(meshThree->GetIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
 
-	// Finally do the actual drawing
-	//  - Do this ONCE PER OBJECT you intend to draw
-	//  - This will use all of the currently set DirectX "stuff" (shaders, buffers, etc)
-	//  - DrawIndexed() uses the currently set INDEX BUFFER to look up corresponding
-	//     vertices in the currently set VERTEX BUFFER
 	context->DrawIndexed(
-		meshThree->GetIndexCount(),     // The number of indices to use (we could draw a subset if we wanted)
-		0,     // Offset to the first index we want to use
-		0);    // Offset to add to each index when looking up vertices
-
-
+		meshThree->GetIndexCount(),
+		0,
+		0);
 
 	// Present the back buffer to the user
 	//  - Puts the final frame we're drawing into the window so the user can see it
