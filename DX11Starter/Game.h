@@ -1,6 +1,7 @@
 #pragma once
 
 #include "DXCore.h"
+#include "Mesh.h"
 #include "SimpleShader.h"
 #include <DirectXMath.h>
 
@@ -31,9 +32,9 @@ private:
 	void CreateMatrices();
 	void CreateBasicGeometry();
 
-	// Buffers to hold actual geometry data
-	ID3D11Buffer* vertexBuffer;
-	ID3D11Buffer* indexBuffer;
+	// Mesh containers for buffer values
+	Mesh* meshOne;
+	Mesh* meshTwo;
 
 	// Wrappers for DirectX shaders to provide simplified functionality
 	SimpleVertexShader* vertexShader;
