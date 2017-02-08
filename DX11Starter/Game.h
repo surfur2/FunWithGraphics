@@ -2,8 +2,12 @@
 
 #include "DXCore.h"
 #include "Mesh.h"
+#include "GameEntity.h"
 #include "SimpleShader.h"
 #include <DirectXMath.h>
+#include <vector>
+
+using namespace std;
 
 class Game 
 	: public DXCore
@@ -35,7 +39,10 @@ private:
 	// Mesh containers for buffer values
 	Mesh* meshOne;
 	Mesh* meshTwo;
-	Mesh* meshThree;
+
+	// Make a few GameEntities
+	int numberGameEntities = 3;
+	vector<GameEntity*> gameEntities;
 
 	// Wrappers for DirectX shaders to provide simplified functionality
 	SimpleVertexShader* vertexShader;
