@@ -25,6 +25,7 @@ Game::Game(HINSTANCE hInstance)
 	meshTwo = 0;
 	vertexShader = 0;
 	pixelShader = 0;
+	myCamera = 0;
 
 #if defined(DEBUG) || defined(_DEBUG)
 	// Do we want a console window?  Probably only in debug mode
@@ -47,6 +48,9 @@ Game::~Game()
 	// Delete all out gameEntities
 	for (int i = 0; i < numberGameEntities; i++)
 		delete gameEntities[i];
+
+	// Delete the camera
+	delete myCamera;
 
 	// Delete our simple shader objects, which
 	// will clean up their own internal DirectX stuff
@@ -109,30 +113,8 @@ void Game::LoadShaders()
 // --------------------------------------------------------
 void Game::CreateMatrices()
 {
-	// Set up world matrix
-	// - In an actual game, each object will need one of these and they should
-	//   update when/if the object moves (every frame)
-	// - You'll notice a "transpose" happening below, which is redundant for
-	//   an identity matrix.  This is just to show that HLSL expects a different
-	//   matrix (column major vs row major) than the DirectX Math library
-	XMMATRIX W = XMMatrixIdentity();
-	XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(W)); // Transpose for HLSL!
-
-	// Create the View matrix
-	// - In an actual game, recreate this matrix every time the camera 
-	//    moves (potentially every frame)
-	// - We're using the LOOK TO function, which takes the position of the
-	//    camera and the direction vector along which to look (as well as "up")
-	// - Another option is the LOOK AT function, to look towards a specific
-	//    point in 3D space
-	XMVECTOR pos = XMVectorSet(0, 0, -5, 0);
-	XMVECTOR dir = XMVectorSet(0, 0, 1, 0);
-	XMVECTOR up  = XMVectorSet(0, 1, 0, 0);
-	XMMATRIX V   = XMMatrixLookToLH(
-		pos,     // The position of the "camera"
-		dir,     // Direction the camera is looking
-		up);     // "Up" direction in 3D space (prevents roll)
-	XMStoreFloat4x4(&viewMatrix, XMMatrixTranspose(V)); // Transpose for HLSL!
+	// Create the camera which has a view matrix
+	myCamera = new Camera(XMFLOAT3(0, 0, -5), 2);
 
 	// Create the Projection matrix
 	// - This should match the window's aspect ratio, and also update anytime
@@ -190,7 +172,7 @@ void Game::CreateBasicGeometry()
 	meshOne = new Mesh(verticesOne, 3, indicesOne, 3, device);
 	meshTwo = new Mesh(verticesTwo, 4, indicesTwo, 6, device);
 
-	// Create game entities with the new meshes.
+	// Create game entities with the new meshes and individual world matricies.
 	gameEntities.push_back(new GameEntity(meshOne));
 	gameEntities.push_back(new GameEntity(meshOne));
 	gameEntities.push_back(new GameEntity(meshTwo));
@@ -227,6 +209,7 @@ void Game::Update(float deltaTime, float totalTime)
 	float sinTime = (sin(totalTime * 3) + 2.0f) / 10.0f;
 	float speed = DirectX::XM_PI / 5.0;
 
+	// Update the world matricies of all our game objects every frame.
 	gameEntities[0]->SetAngleFromOrigin(speed * deltaTime);
 	gameEntities[0]->SetScale(sinTime);
 	gameEntities[0]->SetRotationZ(totalTime);
@@ -236,6 +219,9 @@ void Game::Update(float deltaTime, float totalTime)
 	gameEntities[1]->SetScale(sinTime);
 	gameEntities[1]->SetRotationZ(-totalTime);
 	gameEntities[1]->SetTranslation(2* cos(gameEntities[1]->GetAngleFromOrigin() + DirectX::XM_PI), 2 * sin (gameEntities[1]->GetAngleFromOrigin() + DirectX::XM_PI));
+
+	// Update the view matrix every frame.
+	myCamera->Update(deltaTime);
 }
 
 // --------------------------------------------------------
@@ -268,7 +254,7 @@ void Game::Draw(float deltaTime, float totalTime)
 		//    and then copying that entire buffer to the GPU.  
 		//  - The "SimpleShader" class handles all of that for you.
 		vertexShader->SetMatrix4x4("world", gameEntities[i]->GetMatrix());
-		vertexShader->SetMatrix4x4("view", viewMatrix);
+		vertexShader->SetMatrix4x4("view", myCamera->GetViewMatrix());
 		vertexShader->SetMatrix4x4("projection", projectionMatrix);
 
 		// Once you've set all of the data you care to change for
@@ -335,7 +321,11 @@ void Game::OnMouseUp(WPARAM buttonState, int x, int y)
 void Game::OnMouseMove(WPARAM buttonState, int x, int y)
 {
 	// Add any custom code here...
-
+	if (buttonState && 0x0002)
+	{
+		myCamera->RotateX(prevMousePos.y - y);
+		myCamera->RotateY(prevMousePos.x - x);
+	}
 	// Save the previous mouse position, so we have it for the future
 	prevMousePos.x = x;
 	prevMousePos.y = y;

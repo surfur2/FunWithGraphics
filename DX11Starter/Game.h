@@ -3,6 +3,7 @@
 #include "DXCore.h"
 #include "Mesh.h"
 #include "GameEntity.h"
+#include "Camera.h"
 #include "SimpleShader.h"
 #include <DirectXMath.h>
 #include <vector>
@@ -44,13 +45,14 @@ private:
 	int numberGameEntities = 3;
 	vector<GameEntity*> gameEntities;
 
+	// Make a new Camera
+	Camera* myCamera;
+
 	// Wrappers for DirectX shaders to provide simplified functionality
 	SimpleVertexShader* vertexShader;
 	SimplePixelShader* pixelShader;
 
 	// The matrices to go from model space to screen space
-	DirectX::XMFLOAT4X4 worldMatrix;
-	DirectX::XMFLOAT4X4 viewMatrix;
 	DirectX::XMFLOAT4X4 projectionMatrix;
 
 	// Keeps track of the old mouse position.  Useful for 
