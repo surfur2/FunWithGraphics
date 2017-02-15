@@ -11,7 +11,7 @@ Camera::Camera(XMFLOAT3 newPos, float newMoveSpeed)
 	xRotation = 0;
 	yRotation = 0;
 	moveSpeed = newMoveSpeed;
-	rotationSpeed = .001;
+	rotationSpeed = .003;
 }
 
 
@@ -21,12 +21,24 @@ Camera::~Camera()
 
 void Camera::RotateX(int additionalRotation)
 {
-	xRotation += additionalRotation * rotationSpeed;
+	xRotation += (additionalRotation * rotationSpeed);
+
+	if (xRotation > XM_2PI)
+		xRotation -= XM_2PI;
+
+	if (xRotation < -XM_2PI)
+		xRotation += XM_2PI;
 }
 
 void Camera::RotateY(int additionalRotation)
 {
-	yRotation += additionalRotation * rotationSpeed;
+	yRotation += (additionalRotation * rotationSpeed);
+
+	if (yRotation > XM_2PI)
+		yRotation -= XM_2PI;
+
+	if (yRotation < -XM_2PI)
+		yRotation += XM_2PI;
 }
 
 void Camera::Update(float deltaTime)

@@ -2,7 +2,7 @@
 #include "Mesh.h"
 #include <DirectXMath.h>
 
-
+using namespace DirectX;
 
 GameEntity::GameEntity(Mesh* entityMesh)
 {
@@ -39,6 +39,12 @@ void GameEntity::SetRotation(DirectX::XMFLOAT3 newRotation) { rotation = newRota
 void GameEntity::SetAngleFromOrigin(float angle)
 {
 	angleFromOrigin += angle;
+
+	if (angleFromOrigin > XM_2PI)
+		angleFromOrigin -= XM_2PI;
+
+	if (angleFromOrigin < -XM_2PI)
+		angleFromOrigin += XM_2PI;
 }
 
 float GameEntity::GetAngleFromOrigin()

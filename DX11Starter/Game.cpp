@@ -323,8 +323,8 @@ void Game::OnMouseMove(WPARAM buttonState, int x, int y)
 	// Add any custom code here...
 	if (buttonState && 0x0002)
 	{
-		myCamera->RotateX(prevMousePos.y - y);
-		myCamera->RotateY(prevMousePos.x - x);
+		myCamera->RotateX(y - prevMousePos.y);
+		myCamera->RotateY(x - prevMousePos.x);
 	}
 	// Save the previous mouse position, so we have it for the future
 	prevMousePos.x = x;
