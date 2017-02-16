@@ -5,6 +5,7 @@
 #include "GameEntity.h"
 #include "Camera.h"
 #include "SimpleShader.h"
+#include "Materials.h"
 #include <DirectXMath.h>
 #include <vector>
 
@@ -48,12 +49,8 @@ private:
 	// Make a new Camera
 	Camera* myCamera;
 
-	// Wrappers for DirectX shaders to provide simplified functionality
-	SimpleVertexShader* vertexShader;
-	SimplePixelShader* pixelShader;
-
-	// The matrices to go from model space to screen space
-	DirectX::XMFLOAT4X4 projectionMatrix;
+	//Material for all current stuff
+	Materials* myMaterial;
 
 	// Keeps track of the old mouse position.  Useful for 
 	// determining how far the mouse moved in a single frame.

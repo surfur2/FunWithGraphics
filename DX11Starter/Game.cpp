@@ -23,8 +23,7 @@ Game::Game(HINSTANCE hInstance)
 	// Initialize fields
 	meshOne = 0;
 	meshTwo = 0;
-	vertexShader = 0;
-	pixelShader = 0;
+	myMaterial = 0;
 	myCamera = 0;
 
 #if defined(DEBUG) || defined(_DEBUG)
@@ -41,7 +40,8 @@ Game::Game(HINSTANCE hInstance)
 // --------------------------------------------------------
 Game::~Game()
 {
-	// Delete all our meshes for the game.
+	// Delete all our meshes for the game. We delete these here instead of in entities so that we do not
+	// have to keep track of the number of references per Entity. Different entites will share meshes
 	delete meshOne;
 	delete meshTwo;
 
@@ -52,10 +52,9 @@ Game::~Game()
 	// Delete the camera
 	delete myCamera;
 
-	// Delete our simple shader objects, which
-	// will clean up their own internal DirectX stuff
-	delete vertexShader;
-	delete pixelShader;
+	// Delete my material. We delete these here instead of in entities so that we do not
+	// have to keep track of the number of references per Entity. Different entites will share materials.
+	delete myMaterial;
 }
 
 // --------------------------------------------------------
@@ -85,14 +84,15 @@ void Game::Init()
 // --------------------------------------------------------
 void Game::LoadShaders()
 {
-	vertexShader = new SimpleVertexShader(device, context);
+	SimpleVertexShader* vertexShader = new SimpleVertexShader(device, context);
 	if (!vertexShader->LoadShaderFile(L"Debug/VertexShader.cso"))
 		vertexShader->LoadShaderFile(L"VertexShader.cso");		
 
-	pixelShader = new SimplePixelShader(device, context);
+	SimplePixelShader* pixelShader = new SimplePixelShader(device, context);
 	if(!pixelShader->LoadShaderFile(L"Debug/PixelShader.cso"))	
 		pixelShader->LoadShaderFile(L"PixelShader.cso");
 
+	myMaterial = new Materials(vertexShader, pixelShader);
 	// You'll notice that the code above attempts to load each
 	// compiled shader file (.cso) from two different relative paths.
 
@@ -114,17 +114,7 @@ void Game::LoadShaders()
 void Game::CreateMatrices()
 {
 	// Create the camera which has a view matrix
-	myCamera = new Camera(XMFLOAT3(0, 0, -5), 2);
-
-	// Create the Projection matrix
-	// - This should match the window's aspect ratio, and also update anytime
-	//   the window resizes (which is already happening in OnResize() below)
-	XMMATRIX P = XMMatrixPerspectiveFovLH(
-		0.25f * 3.1415926535f,		// Field of View Angle
-		(float)width / height,		// Aspect ratio
-		0.1f,						// Near clip plane distance
-		100.0f);					// Far clip plane distance
-	XMStoreFloat4x4(&projectionMatrix, XMMatrixTranspose(P)); // Transpose for HLSL!
+	myCamera = new Camera(XMFLOAT3(0, 0, -5), 2, width, height);
 }
 
 
@@ -173,9 +163,9 @@ void Game::CreateBasicGeometry()
 	meshTwo = new Mesh(verticesTwo, 4, indicesTwo, 6, device);
 
 	// Create game entities with the new meshes and individual world matricies.
-	gameEntities.push_back(new GameEntity(meshOne));
-	gameEntities.push_back(new GameEntity(meshOne));
-	gameEntities.push_back(new GameEntity(meshTwo));
+	gameEntities.push_back(new GameEntity(meshOne, myMaterial));
+	gameEntities.push_back(new GameEntity(meshOne, myMaterial));
+	gameEntities.push_back(new GameEntity(meshTwo, myMaterial));
 }
 
 
@@ -188,13 +178,9 @@ void Game::OnResize()
 	// Handle base-level DX resize stuff
 	DXCore::OnResize();
 
-	// Update our projection matrix since the window size changed
-	XMMATRIX P = XMMatrixPerspectiveFovLH(
-		0.25f * 3.1415926535f,	// Field of View Angle
-		(float)width / height,	// Aspect ratio
-		0.1f,				  	// Near clip plane distance
-		100.0f);			  	// Far clip plane distance
-	XMStoreFloat4x4(&projectionMatrix, XMMatrixTranspose(P)); // Transpose for HLSL!
+	// Resize the projection matrix in our Camera
+	myCamera->Resize(width, height);
+
 }
 
 // --------------------------------------------------------
@@ -248,26 +234,8 @@ void Game::Draw(float deltaTime, float totalTime)
 		// Calculate the new worldMatrix for entity
 		gameEntities[i]->CalculateWorldMatrix();
 
-		// Send data to shader variables
-		//  - Do this ONCE PER OBJECT you're drawing
-		//  - This is actually a complex process of copying data to a local buffer
-		//    and then copying that entire buffer to the GPU.  
-		//  - The "SimpleShader" class handles all of that for you.
-		vertexShader->SetMatrix4x4("world", gameEntities[i]->GetMatrix());
-		vertexShader->SetMatrix4x4("view", myCamera->GetViewMatrix());
-		vertexShader->SetMatrix4x4("projection", projectionMatrix);
-
-		// Once you've set all of the data you care to change for
-		// the next draw call, you need to actually send it to the GPU
-		//  - If you skip this, the "SetMatrix" calls above won't make it to the GPU!
-		vertexShader->CopyAllBufferData();
-
-		// Set the vertex and pixel shaders to use for the next Draw() command
-		//  - These don't technically need to be set every frame...YET
-		//  - Once you start applying different shaders to different objects,
-		//    you'll need to swap the current shaders before each draw
-		vertexShader->SetShader();
-		pixelShader->SetShader();
+		// Set all material data for each game entity
+		gameEntities[i]->PrepareMaterials(myCamera->GetViewMatrix(), myCamera->GetProjectionMatrix());
 
 		// Custom draw method that will set the mesh verticies for us
 		gameEntities[i]->Draw(context);

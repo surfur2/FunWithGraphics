@@ -2,24 +2,27 @@
 
 #include <DirectXMath.h>
 #include "Mesh.h"
+#include "Materials.h"
+
+using namespace DirectX;
 
 class GameEntity
 {
 public:
-	GameEntity(Mesh* entityMesh);
+	GameEntity(Mesh* entityMesh, Materials* newMaterial);
 	~GameEntity();
 
-	DirectX::XMFLOAT4X4 GetMatrix();
-	void SetMatrix(DirectX::XMMATRIX& newWorldMatrix);
+	XMFLOAT4X4 GetMatrix();
+	void SetMatrix(XMMATRIX& newWorldMatrix);
 
-	DirectX::XMFLOAT3 GetPosition();
-	void SetPosition(DirectX::XMFLOAT3 newPosition);
+	XMFLOAT3 GetPosition();
+	void SetPosition(XMFLOAT3 newPosition);
 	
-	DirectX::XMFLOAT3 GetScalar();
-	void SetScalar(DirectX::XMFLOAT3 newScalar);
+	XMFLOAT3 GetScalar();
+	void SetScalar(XMFLOAT3 newScalar);
 
-	DirectX::XMFLOAT3 GetRotation();
-	void SetRotation(DirectX::XMFLOAT3 newRotation);
+	XMFLOAT3 GetRotation();
+	void SetRotation(XMFLOAT3 newRotation);
 
 	void Draw(ID3D11DeviceContext*	context);
 
@@ -34,12 +37,15 @@ public:
 
 	void CalculateWorldMatrix();
 
+	void PrepareMaterials(XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix);
+
 private:
-	DirectX::XMFLOAT3 position;
-	DirectX::XMFLOAT3 scalar;
-	DirectX::XMFLOAT3 rotation;
-	DirectX::XMFLOAT4X4 worldMatrix;
+	XMFLOAT3 position;
+	XMFLOAT3 scalar;
+	XMFLOAT3 rotation;
+	XMFLOAT4X4 worldMatrix;
 	Mesh* myMesh;
+	Materials* myMaterial;
 	float angleFromOrigin;
 };
 
