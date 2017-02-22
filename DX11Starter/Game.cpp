@@ -23,6 +23,7 @@ Game::Game(HINSTANCE hInstance)
 	// Initialize fields
 	meshOne = 0;
 	meshTwo = 0;
+	meshObject = 0;
 	myMaterial = 0;
 	myCamera = 0;
 
@@ -44,6 +45,7 @@ Game::~Game()
 	// have to keep track of the number of references per Entity. Different entites will share meshes
 	delete meshOne;
 	delete meshTwo;
+	delete meshObject;
 
 	// Delete all out gameEntities
 	for (int i = 0; i < numberGameEntities; i++)
@@ -125,18 +127,22 @@ void Game::CreateBasicGeometry()
 {
 	// Create some temporary variables to represent colors
 	// - Not necessary, just makes things more readable
-	XMFLOAT4 red	= XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
-	XMFLOAT4 green	= XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
-	XMFLOAT4 blue	= XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+	//XMFLOAT4 red	= XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+	//XMFLOAT4 green	= XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	//XMFLOAT4 blue	= XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+
+	// Default normals and uvs for testing purposes.
+	XMFLOAT3 defaultNormal = XMFLOAT3(0.0f, 0.0f, -1.0f);
+	XMFLOAT2 defaultUV = XMFLOAT2(0.0f, 0.0f);
 
 	// Set up the vertices of the triangle we would like to draw
 	// - We're going to copy this array, exactly as it exists in memory
 	//    over to a DirectX-controlled data structure (the vertex buffer)
 	Vertex verticesOne[] = 
 	{
-		{ XMFLOAT3(+0.0f, +1.0f, +0.0f), red },
-		{ XMFLOAT3(+1.5f, -1.0f, +0.0f), blue },
-		{ XMFLOAT3(-1.5f, -1.0f, +0.0f), green },
+		{ XMFLOAT3(+0.0f, +1.0f, +0.0f), defaultNormal, defaultUV },
+		{ XMFLOAT3(+1.5f, -1.0f, +0.0f), defaultNormal, defaultUV },
+		{ XMFLOAT3(-1.5f, -1.0f, +0.0f), defaultNormal, defaultUV },
 
 	};
 
@@ -144,10 +150,10 @@ void Game::CreateBasicGeometry()
 
 	Vertex verticesTwo[] =
 	{
-		{ XMFLOAT3(+0.0f, +0.87f, +0.0f), red },
-		{ XMFLOAT3(+0.5f, -0.0f, +0.0f), red },
-		{ XMFLOAT3(-0.5f, -0.0f, +0.0f), blue },
-		{ XMFLOAT3(-0.0f, -0.87f, +0.0f), green },
+		{ XMFLOAT3(+0.0f, +0.87f, +0.0f), defaultNormal, defaultUV },
+		{ XMFLOAT3(+0.5f, -0.0f, +0.0f), defaultNormal, defaultUV },
+		{ XMFLOAT3(-0.5f, -0.0f, +0.0f), defaultNormal, defaultUV },
+		{ XMFLOAT3(-0.0f, -0.87f, +0.0f), defaultNormal, defaultUV },
 	};
 
 	// Set up the indices, which tell us which vertices to use and in which order
@@ -161,11 +167,13 @@ void Game::CreateBasicGeometry()
 	// Create our meshes for the game
 	meshOne = new Mesh(verticesOne, 3, indicesOne, 3, device);
 	meshTwo = new Mesh(verticesTwo, 4, indicesTwo, 6, device);
+	meshObject = new Mesh("cone.obj", device);
 
 	// Create game entities with the new meshes and individual world matricies.
-	gameEntities.push_back(new GameEntity(meshOne, myMaterial));
-	gameEntities.push_back(new GameEntity(meshOne, myMaterial));
-	gameEntities.push_back(new GameEntity(meshTwo, myMaterial));
+	//gameEntities.push_back(new GameEntity(meshOne, myMaterial));
+	//gameEntities.push_back(new GameEntity(meshOne, myMaterial));
+	//gameEntities.push_back(new GameEntity(meshTwo, myMaterial));
+	gameEntities.push_back(new GameEntity(meshObject, myMaterial));
 }
 
 
@@ -196,7 +204,7 @@ void Game::Update(float deltaTime, float totalTime)
 	float speed = DirectX::XM_PI / 5.0;
 
 	// Update the world matricies of all our game objects every frame.
-	gameEntities[0]->SetAngleFromOrigin(speed * deltaTime);
+	/*gameEntities[0]->SetAngleFromOrigin(speed * deltaTime);
 	gameEntities[0]->SetScale(sinTime);
 	gameEntities[0]->SetRotationZ(totalTime);
 	gameEntities[0]->SetTranslation(2 * cos(gameEntities[0]->GetAngleFromOrigin()),2 * sin(gameEntities[0]->GetAngleFromOrigin()));
@@ -204,7 +212,7 @@ void Game::Update(float deltaTime, float totalTime)
 	gameEntities[1]->SetAngleFromOrigin(speed * deltaTime);
 	gameEntities[1]->SetScale(sinTime);
 	gameEntities[1]->SetRotationZ(-totalTime);
-	gameEntities[1]->SetTranslation(2* cos(gameEntities[1]->GetAngleFromOrigin() + DirectX::XM_PI), 2 * sin (gameEntities[1]->GetAngleFromOrigin() + DirectX::XM_PI));
+	gameEntities[1]->SetTranslation(2* cos(gameEntities[1]->GetAngleFromOrigin() + DirectX::XM_PI), 2 * sin (gameEntities[1]->GetAngleFromOrigin() + DirectX::XM_PI));*/
 
 	// Update the view matrix every frame.
 	myCamera->Update(deltaTime);

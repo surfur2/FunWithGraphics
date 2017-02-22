@@ -41,9 +41,10 @@ private:
 	// Mesh containers for buffer values
 	Mesh* meshOne;
 	Mesh* meshTwo;
+	Mesh* meshObject;
 
 	// Make a few GameEntities
-	int numberGameEntities = 3;
+	int numberGameEntities = 1;
 	vector<GameEntity*> gameEntities;
 
 	// Make a new Camera
