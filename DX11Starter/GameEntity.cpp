@@ -1,5 +1,6 @@
 #include "GameEntity.h"
 #include "Mesh.h"
+#include "Lights.h"
 #include <DirectXMath.h>
 
 using namespace DirectX;
@@ -98,7 +99,7 @@ void GameEntity::Draw(ID3D11DeviceContext*	context)
 		0);    // Offset to add to each index when looking up vertices
 }
 
-void GameEntity::PrepareMaterials(XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMarix)
+void GameEntity::PrepareMaterials(XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMarix, DirectionalLight& dirLightOne, DirectionalLight& dirLightTwo)
 {
 	// Send data to shader variables
 	//  - Do this ONCE PER OBJECT you're drawing
@@ -113,11 +114,24 @@ void GameEntity::PrepareMaterials(XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMa
 	// the next draw call, you need to actually send it to the GPU
 	//  - If you skip this, the "SetMatrix" calls above won't make it to the GPU!
 	myMaterial->GetVertexShader()->CopyAllBufferData();
+	myMaterial->GetVertexShader()->SetShader();
 
 	// Set the vertex and pixel shaders to use for the next Draw() command
 	//  - These don't technically need to be set every frame...YET
 	//  - Once you start applying different shaders to different objects,
 	//    you'll need to swap the current shaders before each draw
-	myMaterial->GetVertexShader()->SetShader();
+	myMaterial->GetPixelShader()->SetData(
+		"lightOne",
+		&dirLightOne,
+		sizeof(DirectionalLight));
+
+	myMaterial->GetPixelShader()->SetData(
+		"lightTwo",
+		&dirLightTwo,
+		sizeof(DirectionalLight));
+
+
+	myMaterial->GetPixelShader()->CopyAllBufferData();
 	myMaterial->GetPixelShader()->SetShader();
+
 }

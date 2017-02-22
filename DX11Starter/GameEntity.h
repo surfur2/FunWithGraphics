@@ -3,6 +3,7 @@
 #include <DirectXMath.h>
 #include "Mesh.h"
 #include "Materials.h"
+#include "Lights.h"
 
 using namespace DirectX;
 
@@ -37,7 +38,7 @@ public:
 
 	void CalculateWorldMatrix();
 
-	void PrepareMaterials(XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix);
+	void PrepareMaterials(XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, DirectionalLight& dirLight, DirectionalLight& dirLightTwo);
 
 private:
 	XMFLOAT3 position;

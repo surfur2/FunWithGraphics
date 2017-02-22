@@ -26,6 +26,8 @@ Game::Game(HINSTANCE hInstance)
 	meshObject = 0;
 	myMaterial = 0;
 	myCamera = 0;
+	pixelShader = 0;
+	vertexShader = 0;
 
 #if defined(DEBUG) || defined(_DEBUG)
 	// Do we want a console window?  Probably only in debug mode
@@ -57,6 +59,11 @@ Game::~Game()
 	// Delete my material. We delete these here instead of in entities so that we do not
 	// have to keep track of the number of references per Entity. Different entites will share materials.
 	delete myMaterial;
+
+	// Delete our simple shader objects, which
+	// will clean up their own internal DirectX stuff
+	delete vertexShader;
+	delete pixelShader;
 }
 
 // --------------------------------------------------------
@@ -65,6 +72,15 @@ Game::~Game()
 // --------------------------------------------------------
 void Game::Init()
 {
+	// Create Lights
+	dirLightOne.AmbientColor = XMFLOAT4(.1f, .1f, .1f, 1.0f);
+	dirLightOne.DiffuseColor = XMFLOAT4(.5f, .5f, 1, 1);
+	dirLightOne.Direction = XMFLOAT3(1, -1, 0);
+
+	dirLightTwo.AmbientColor = XMFLOAT4(.1f, .1f, .1f, 1.0f);
+	dirLightTwo.DiffuseColor = XMFLOAT4(1, .5f, .5f, 1);
+	dirLightTwo.Direction = XMFLOAT3(-2, -2, 0);
+
 	// Helper methods for loading shaders, creating some basic
 	// geometry to draw and some simple camera matrices.
 	//  - You'll be expanding and/or replacing these later
@@ -86,11 +102,11 @@ void Game::Init()
 // --------------------------------------------------------
 void Game::LoadShaders()
 {
-	SimpleVertexShader* vertexShader = new SimpleVertexShader(device, context);
+	vertexShader = new SimpleVertexShader(device, context);
 	if (!vertexShader->LoadShaderFile(L"Debug/VertexShader.cso"))
 		vertexShader->LoadShaderFile(L"VertexShader.cso");		
 
-	SimplePixelShader* pixelShader = new SimplePixelShader(device, context);
+	pixelShader = new SimplePixelShader(device, context);
 	if(!pixelShader->LoadShaderFile(L"Debug/PixelShader.cso"))	
 		pixelShader->LoadShaderFile(L"PixelShader.cso");
 
@@ -243,7 +259,7 @@ void Game::Draw(float deltaTime, float totalTime)
 		gameEntities[i]->CalculateWorldMatrix();
 
 		// Set all material data for each game entity
-		gameEntities[i]->PrepareMaterials(myCamera->GetViewMatrix(), myCamera->GetProjectionMatrix());
+		gameEntities[i]->PrepareMaterials(myCamera->GetViewMatrix(), myCamera->GetProjectionMatrix(), dirLightOne, dirLightTwo);
 
 		// Custom draw method that will set the mesh verticies for us
 		gameEntities[i]->Draw(context);

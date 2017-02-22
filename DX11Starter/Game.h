@@ -4,6 +4,7 @@
 #include "Mesh.h"
 #include "GameEntity.h"
 #include "Camera.h"
+#include "Lights.h"
 #include "SimpleShader.h"
 #include "Materials.h"
 #include <DirectXMath.h>
@@ -49,6 +50,14 @@ private:
 
 	// Make a new Camera
 	Camera* myCamera;
+
+	// Shaders for game
+	SimpleVertexShader* vertexShader;
+	SimplePixelShader* pixelShader;
+
+	// Lights for game
+	DirectionalLight dirLightOne;
+	DirectionalLight dirLightTwo;
 
 	//Material for all current stuff
 	Materials* myMaterial;

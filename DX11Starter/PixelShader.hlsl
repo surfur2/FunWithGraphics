@@ -13,9 +13,25 @@ struct VertexToPixel
 	//  v    v                v
 	float4 position		: SV_POSITION;
 	float3 normal       : NORMAL;
-	float2 uv           : TEXCOORD;
+	//float2 uv           : TEXCOORD;
 	//float4 color		: COLOR;
 };
+
+// Struct for defining a directional light
+struct DirectionalLight
+{
+	float4 AmbientColor;
+	float4 DiffuseColor;
+	float3 Direction;
+};
+
+// cbuffer for a directional light
+cbuffer externalData : register(b0)
+{
+	DirectionalLight lightOne;
+	DirectionalLight lightTwo;
+};
+
 
 // --------------------------------------------------------
 // The entry point (main method) for our pixel shader
@@ -28,9 +44,20 @@ struct VertexToPixel
 // --------------------------------------------------------
 float4 main(VertexToPixel input) : SV_TARGET
 {
-	// Just return the input color
-	// - This color (like most values passing through the rasterizer) is 
-	//   interpolated for each pixel between the corresponding vertices 
-	//   of the triangle we're rendering
-	return float4(1, 0, 0, 1);
+	// Calculate the lights effects in the scene
+	
+	// Normnalize all incoming pixel data, just in case.
+	input.normal = normalize(input.normal);
+
+	// Reverse the direction of light direction
+	float3 lightOneReverseNormal = normalize(mul(lightOne.Direction , -1.0f));
+	float3 lightTwoReverseNormal = normalize(mul(lightTwo.Direction, -1.0f));
+
+	// Calculate the amount of light on a single pixel by taking the between direction to the light and the normal of a pixel.
+	// This yields the angle between the two.
+	float amountLightOne = saturate(dot(input.normal, lightOneReverseNormal));
+	float amountLightTwo = saturate(dot(input.normal, lightTwoReverseNormal));
+
+	// Add all lights together and return the color.
+	return (lightOne.DiffuseColor * amountLightOne) + (lightTwo.DiffuseColor * amountLightTwo);
 }

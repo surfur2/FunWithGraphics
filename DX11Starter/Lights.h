@@ -1,0 +1,13 @@
+#include <d3d11.h>
+#include <d3dcompiler.h>
+#include <DirectXMath.h>
+#pragma once
+
+using namespace DirectX;
+
+struct DirectionalLight
+{
+	XMFLOAT4 AmbientColor;
+	XMFLOAT4 DiffuseColor;
+	XMFLOAT3 Direction;
+};
