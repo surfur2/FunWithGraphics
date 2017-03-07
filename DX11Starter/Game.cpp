@@ -1,5 +1,6 @@
 #include "Game.h"
 #include "Vertex.h"
+#include "WICTextureLoader.h"
 
 // For the DirectX Math library
 using namespace DirectX;
@@ -28,6 +29,9 @@ Game::Game(HINSTANCE hInstance)
 	myCamera = 0;
 	pixelShader = 0;
 	vertexShader = 0;
+	radSRV = 0;
+	mtlSRV = 0;
+	sampler = 0;
 
 #if defined(DEBUG) || defined(_DEBUG)
 	// Do we want a console window?  Probably only in debug mode
@@ -55,6 +59,11 @@ Game::~Game()
 
 	// Delete the camera
 	delete myCamera;
+
+	//Release texture resources
+	radSRV->Release();
+	mtlSRV->Release();
+	sampler->Release();
 
 	// Delete my material. We delete these here instead of in entities so that we do not
 	// have to keep track of the number of references per Entity. Different entites will share materials.
@@ -107,10 +116,29 @@ void Game::LoadShaders()
 		vertexShader->LoadShaderFile(L"VertexShader.cso");		
 
 	pixelShader = new SimplePixelShader(device, context);
-	if(!pixelShader->LoadShaderFile(L"Debug/PixelShader.cso"))	
+	if (!pixelShader->LoadShaderFile(L"Debug/PixelShader.cso"))
 		pixelShader->LoadShaderFile(L"PixelShader.cso");
 
-	myMaterial = new Materials(vertexShader, pixelShader);
+	CreateWICTextureFromFile(device, context, L"Assets/Textures/rad.png", 0, &radSRV);
+	CreateWICTextureFromFile(device, context, L"Assets/Textures/mtl.png", 0, &mtlSRV);
+
+	// Create a sampler state that defines the sampling
+	// options for any and all textures we use
+
+	// First, create a description
+	D3D11_SAMPLER_DESC sampDesc = {};
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	sampDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+	sampDesc.MaxAnisotropy = 16;
+
+
+	// Now, create the sampler from the description
+	device->CreateSamplerState(&sampDesc, &sampler);
+
+	myMaterial = new Materials(vertexShader, pixelShader, radSRV, sampler);
 	// You'll notice that the code above attempts to load each
 	// compiled shader file (.cso) from two different relative paths.
 

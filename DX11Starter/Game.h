@@ -59,6 +59,11 @@ private:
 	DirectionalLight dirLightOne;
 	DirectionalLight dirLightTwo;
 
+	// Textures for the game
+	ID3D11ShaderResourceView* radSRV;
+	ID3D11ShaderResourceView* mtlSRV;
+	ID3D11SamplerState* sampler;
+
 	//Material for all current stuff
 	Materials* myMaterial;
 

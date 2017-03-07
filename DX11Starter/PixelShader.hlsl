@@ -13,7 +13,7 @@ struct VertexToPixel
 	//  v    v                v
 	float4 position		: SV_POSITION;
 	float3 normal       : NORMAL;
-	//float2 uv           : TEXCOORD;
+	float2 uv           : TEXCOORD;
 	//float4 color		: COLOR;
 };
 
@@ -32,6 +32,8 @@ cbuffer externalData : register(b0)
 	DirectionalLight lightTwo;
 };
 
+Texture2D diffuseTexture : register(t0);
+SamplerState samp : register (s0);
 
 // --------------------------------------------------------
 // The entry point (main method) for our pixel shader
@@ -44,8 +46,13 @@ cbuffer externalData : register(b0)
 // --------------------------------------------------------
 float4 main(VertexToPixel input) : SV_TARGET
 {
+
+	// Sample a texture for the colors on that texture
+	float4 surfaceColor = diffuseTexture.Sample(samp, input.uv);
+
+
 	// Calculate the lights effects in the scene
-	
+
 	// Normnalize all incoming pixel data, just in case.
 	input.normal = normalize(input.normal);
 
@@ -59,5 +66,5 @@ float4 main(VertexToPixel input) : SV_TARGET
 	float amountLightTwo = saturate(dot(input.normal, lightTwoReverseNormal));
 
 	// Add all lights together and return the color.
-	return (lightOne.DiffuseColor * amountLightOne) + (lightTwo.DiffuseColor * amountLightTwo);
+	return (surfaceColor * amountLightOne) + (surfaceColor * amountLightTwo);
 }

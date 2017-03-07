@@ -130,6 +130,13 @@ void GameEntity::PrepareMaterials(XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMa
 		&dirLightTwo,
 		sizeof(DirectionalLight));
 
+	myMaterial->GetPixelShader()->SetShaderResourceView(
+		"diffuseTexture",
+		myMaterial->GetShaderResourceView());
+
+	myMaterial->GetPixelShader()->SetSamplerState(
+		"samp",
+		myMaterial->GetSamplerState());
 
 	myMaterial->GetPixelShader()->CopyAllBufferData();
 	myMaterial->GetPixelShader()->SetShader();
