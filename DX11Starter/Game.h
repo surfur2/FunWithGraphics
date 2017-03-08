@@ -43,9 +43,10 @@ private:
 	Mesh* meshOne;
 	Mesh* meshTwo;
 	Mesh* meshObject;
+	Mesh* meshCube;
 
 	// Make a few GameEntities
-	int numberGameEntities = 1;
+	int numberGameEntities = 2;
 	vector<GameEntity*> gameEntities;
 
 	// Make a new Camera
@@ -66,6 +67,7 @@ private:
 
 	//Material for all current stuff
 	Materials* myMaterial;
+	Materials* metalMat;
 
 	// Keeps track of the old mouse position.  Useful for 
 	// determining how far the mouse moved in a single frame.

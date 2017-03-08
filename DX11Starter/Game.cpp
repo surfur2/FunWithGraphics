@@ -26,6 +26,7 @@ Game::Game(HINSTANCE hInstance)
 	meshTwo = 0;
 	meshObject = 0;
 	myMaterial = 0;
+	metalMat = 0;
 	myCamera = 0;
 	pixelShader = 0;
 	vertexShader = 0;
@@ -52,6 +53,7 @@ Game::~Game()
 	delete meshOne;
 	delete meshTwo;
 	delete meshObject;
+	delete meshCube;
 
 	// Delete all out gameEntities
 	for (int i = 0; i < numberGameEntities; i++)
@@ -68,6 +70,7 @@ Game::~Game()
 	// Delete my material. We delete these here instead of in entities so that we do not
 	// have to keep track of the number of references per Entity. Different entites will share materials.
 	delete myMaterial;
+	delete metalMat;
 
 	// Delete our simple shader objects, which
 	// will clean up their own internal DirectX stuff
@@ -87,8 +90,8 @@ void Game::Init()
 	dirLightOne.Direction = XMFLOAT3(1, -1, 0);
 
 	dirLightTwo.AmbientColor = XMFLOAT4(.1f, .1f, .1f, 1.0f);
-	dirLightTwo.DiffuseColor = XMFLOAT4(1, .5f, .5f, 1);
-	dirLightTwo.Direction = XMFLOAT3(-2, -2, 0);
+	dirLightTwo.DiffuseColor = XMFLOAT4(1, 1, 1, 1);
+	dirLightTwo.Direction = XMFLOAT3(1, -1, 0);
 
 	// Helper methods for loading shaders, creating some basic
 	// geometry to draw and some simple camera matrices.
@@ -139,6 +142,7 @@ void Game::LoadShaders()
 	device->CreateSamplerState(&sampDesc, &sampler);
 
 	myMaterial = new Materials(vertexShader, pixelShader, radSRV, sampler);
+	metalMat = new Materials(vertexShader, pixelShader, mtlSRV, sampler);
 	// You'll notice that the code above attempts to load each
 	// compiled shader file (.cso) from two different relative paths.
 
@@ -212,12 +216,16 @@ void Game::CreateBasicGeometry()
 	meshOne = new Mesh(verticesOne, 3, indicesOne, 3, device);
 	meshTwo = new Mesh(verticesTwo, 4, indicesTwo, 6, device);
 	meshObject = new Mesh("cone.obj", device);
+	meshCube = new Mesh("cube.obj", device);
 
 	// Create game entities with the new meshes and individual world matricies.
 	//gameEntities.push_back(new GameEntity(meshOne, myMaterial));
 	//gameEntities.push_back(new GameEntity(meshOne, myMaterial));
 	//gameEntities.push_back(new GameEntity(meshTwo, myMaterial));
 	gameEntities.push_back(new GameEntity(meshObject, myMaterial));
+	GameEntity* temp = new GameEntity(meshCube, metalMat);
+	temp->SetPosition(XMFLOAT3(4, 0 , 0));
+	gameEntities.push_back(temp);
 }
 
 
